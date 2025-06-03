@@ -93,7 +93,8 @@ const submitButton = document.querySelector("#submit-collaboration-button");
 // Add an event listener to intercept the form submission
 //form.addEventListener('submit', async function(event) {
 submitButton.addEventListener("click", async function (event) {
-  // Prevent the default form submission
+  // Select the parent form
+  const form = submitButton.closest("form");
 
   // two lines added for processing rich text input
   const aimsField = document.querySelector("#Aims");

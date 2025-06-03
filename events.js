@@ -84,7 +84,8 @@ const submitButton = document.querySelector("#submit-event-button");
 
 // Add an event listener to intercept the form submission
 submitButton.addEventListener("click", async function (event) {
-  // Prevent the default form submission
+  // Select the parent form
+  const form = submitButton.closest("form");
 
   // two lines added for processing rich text input
   const detailsField = document.querySelector("#Further-details");
