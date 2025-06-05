@@ -79,7 +79,6 @@ document.addEventListener("DOMContentLoaded", function () {
   // Function to handle showing/hiding fields based on selection
   function handleSignUpTypeChange() {
     const selectedType = signUpType.value;
-    console.log(`Signup type changed to : ${selectedType}`);
 
     if (selectedType === "email") {
       emailField.style.display = "block";
@@ -178,11 +177,11 @@ form.addEventListener("submit", async function (event) {
     });
 
     if (response.ok) {
-      // Reset the form values
-      form.reset();
       // Manually trigger Webflow success message
       successMessage.style.display = "block";
       errorMessage.style.display = "none";
+      // Reset the form values
+      form.reset();
     } else {
       sendErrorDetails("Event: if-!response.ok", response);
       // Manually trigger Webflow error message

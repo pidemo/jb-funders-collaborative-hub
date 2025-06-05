@@ -38,11 +38,9 @@ const quillResources = new Quill("#editor-resources", {
 function setupMirrorField(triggerFieldAttr, hiddenFieldId) {
   const checkboxes = document.querySelectorAll(`[${triggerFieldAttr}]`);
   const hiddenField = document.getElementById(hiddenFieldId);
-  // console.log(checkboxes, hiddenField);
 
   checkboxes.forEach((checkbox) => {
     checkbox.addEventListener("change", updateHiddenField);
-    // console.log("Checkbox change");
   });
 
   function updateHiddenField() {
@@ -54,7 +52,6 @@ function setupMirrorField(triggerFieldAttr, hiddenFieldId) {
       }
     });
     hiddenField.value = selectedActivities.join(",");
-    // console.log(selectedActivities.join(','));
   }
 }
 
@@ -190,11 +187,11 @@ form.addEventListener("submit", async function (event) {
     });
 
     if (response.ok) {
-      // Reset the form values
-      form.reset();
       // Manually trigger Webflow success message
       successMessage.style.display = "block";
       errorMessage.style.display = "none";
+      // Reset the form values
+      form.reset();
     } else {
       sendErrorDetails("Collab: if-!response.ok", response);
       // Manually trigger Webflow error message
