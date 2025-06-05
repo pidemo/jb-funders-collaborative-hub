@@ -1,5 +1,9 @@
 # jb-fch
 
+## Current Script Status
+
+**Important:** At the moment, `add-collaboration.js` and `add-event.js` are the main scripts currently in use. The files `collaborations.js` and `events.js` are future iterations that haven't been implemented yet.
+
 ## Instructions for Webflow Website Managers
 
 To ensure the collaboration forms work properly with the custom scripts, please follow these guidelines when updating or creating forms in Webflow:
