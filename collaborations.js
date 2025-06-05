@@ -1,5 +1,3 @@
-const hookUrl = "0rwzyvqdypm21391f9vqhetvus9xjra8";
-
 // Define common Quill options
 const quillOptions = {
   modules: {
@@ -40,11 +38,9 @@ const quillResources = new Quill("#editor-resources", {
 function setupMirrorField(triggerFieldAttr, hiddenFieldId) {
   const checkboxes = document.querySelectorAll(`[${triggerFieldAttr}]`);
   const hiddenField = document.getElementById(hiddenFieldId);
-  // console.log(checkboxes, hiddenField);
 
   checkboxes.forEach((checkbox) => {
     checkbox.addEventListener("change", updateHiddenField);
-    // console.log("Checkbox change");
   });
 
   function updateHiddenField() {
@@ -56,9 +52,54 @@ function setupMirrorField(triggerFieldAttr, hiddenFieldId) {
       }
     });
     hiddenField.value = selectedActivities.join(",");
-    // console.log(selectedActivities.join(','));
   }
 }
+
+const setAccessibilityAndKeyboard = (submitButton) => {
+  if (!submitButton) return;
+
+  // Set labels and attributes for keyboard accessibility
+  submitButton.setAttribute("role", "button");
+  submitButton.setAttribute("tabindex", "0");
+  submitButton.setAttribute("aria-label", "Submit form");
+
+  // Keyboard accessibility: trigger click on Enter or Space
+  submitButton.addEventListener("keydown", function (event) {
+    if (event.key === "Enter" || event.key === " ") {
+      event.preventDefault();
+      submitButton.click();
+    }
+  });
+};
+
+const checkFormValidity = (form) => {
+  if (!form.checkValidity()) {
+    form.reportValidity(); // Show browser validation errors
+    return false; // Stop further processing
+  }
+  return true;
+};
+
+const displayNotificationMessage = (form, submitButton, success = false) => {
+  const formWrapper = form.closest(".w-form");
+  if (!formWrapper) return;
+  const successMessage = formWrapper.querySelector(".w-form-done");
+  const errorMessage = formWrapper.querySelector(".w-form-fail");
+  if (!successMessage || !errorMessage) return;
+
+  if (success) {
+    form.style.display = "none";
+    form.reset();
+    successMessage.style.display = "block";
+    errorMessage.style.display = "none";
+  } else {
+    submitButton.style.display = "none";
+    successMessage.style.display = "none";
+    errorMessage.style.display = "block";
+  }
+};
+
+const hookUrl = "0rwzyvqdypm21391f9vqhetvus9xjra8";
 
 document.addEventListener("DOMContentLoaded", function () {
   // Call the setup function for each pair of trigger and hidden field IDs
@@ -89,14 +130,15 @@ locationElements.forEach((element) => {
 
 // Script to submit form to webhook
 const submitButton = document.querySelector("#submit-collaboration-button");
+setAccessibilityAndKeyboard(submitButton);
 
 // Add an event listener to intercept the form submission
 //form.addEventListener('submit', async function(event) {
 submitButton.addEventListener("click", async function (event) {
+  event.preventDefault();
   // Select the parent form
   const form = submitButton.closest("form");
 
-  // two lines added for processing rich text input
   const aimsField = document.querySelector("#Aims");
   aimsField.value = quillAims.root.innerHTML;
 
@@ -109,6 +151,10 @@ submitButton.addEventListener("click", async function (event) {
   const learningField = document.querySelector("#Learning-Or-Resources");
   learningField.value = quillResources.root.innerHTML;
 
+  if (!checkFormValidity(form)) {
+    return;
+  }
+
   // Get form data
   const formData = new FormData(form);
 
@@ -118,6 +164,8 @@ submitButton.addEventListener("click", async function (event) {
     data[key] = value;
   });
 
+  console.log("Form data", data);
+
   // Submit form data to your webhook
   try {
     const response = await fetch(`https://hook.eu1.make.com/${hookUrl}`, {
@@ -125,43 +173,9 @@ submitButton.addEventListener("click", async function (event) {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(data),
     });
-
-    if (response.ok) {
-      // Reset the form values
-      form.reset();
-      // Manually trigger Webflow success message
-      document.querySelector(".w-form-done").style.display = "block";
-      document.querySelector(".w-form-fail").style.display = "none";
-    } else {
-      // Manually trigger Webflow error message
-      document.querySelector(".w-form-fail").style.display = "block";
-      document.querySelector(".w-form-done").style.display = "none";
-    }
+    displayNotificationMessage(form, submitButton, response.ok);
   } catch (error) {
     console.error("Error submitting to webhook:", error);
-
-    // Show the Webflow error message on fetch error
-    document.querySelector(".w-form-fail").style.display = "block";
-    document.querySelector(".w-form-done").style.display = "none";
+    displayNotificationMessage(form, submitButton, false);
   }
 });
-
-/*
-  // Script to show/hide Physical location field based on Type of location
-  const locationTypeInput = document.querySelector('#Location-type');
-  const physicalLocationInput = document.querySelector('#physical-location');
-  
-  if (locationTypeInput && physicalLocationInput) {
-      // Anytime location type changes
-    locationTypeInput.addEventListener('change', function() {
-      const locationType = locationTypeInput.value;
-          
-      // Add/remove hide-onload class based on location type 
-      if (locationType != "Online") {
-        physicalLocationInput.classList.remove('hide-onload');
-      } else {
-        physicalLocationInput.classList.add('hide-onload');
-      }
-    })
-  };
-  */
