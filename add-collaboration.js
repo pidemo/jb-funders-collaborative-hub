@@ -65,8 +65,21 @@ function validateSingleURL(inputValue) {
     return { isValid: true, message: "" };
   }
 
-  // Check if there are spaces (indicating multiple URLs)
+  // Check for multiple URLs by looking for:
+  // - spaces (already handled)
+  // - commas
+  // - more than one "http" or "https" occurrence
+  // - two URLs stuck together (e.g., ...com/https...)
   if (trimmedValue.includes(" ")) {
+    return { isValid: false, message: "Please enter only one URL" };
+  }
+  if (trimmedValue.includes(",")) {
+    return { isValid: false, message: "Please enter only one URL" };
+  }
+  // Count occurrences of "http://" or "https://"
+  const urlPattern = /(https?:\/\/)/g;
+  const matches = trimmedValue.match(urlPattern);
+  if (matches && matches.length > 1) {
     return { isValid: false, message: "Please enter only one URL" };
   }
 
