@@ -36,6 +36,83 @@ if (locationTypeInput && physicalLocationInput) {
   });
 }
 
+// URL validation function
+function validateSingleURL(inputValue) {
+  // Remove leading/trailing whitespace
+  const trimmedValue = inputValue.trim();
+
+  // If empty, it's valid (unless field is required)
+  if (!trimmedValue) {
+    return { isValid: true, message: "" };
+  }
+
+  // Check if there are spaces (indicating multiple URLs)
+  if (trimmedValue.includes(" ")) {
+    return { isValid: false, message: "Please enter only one URL" };
+  }
+
+  // Validate the URL format
+  try {
+    const urlObj = new URL(trimmedValue);
+    if (urlObj.protocol !== "http:" && urlObj.protocol !== "https:") {
+      return {
+        isValid: false,
+        message: "Please enter a valid HTTP or HTTPS URL",
+      };
+    }
+    return { isValid: true, message: "" };
+  } catch (e) {
+    return { isValid: false, message: "Please enter a valid URL" };
+  }
+}
+
+// Generic function to setup URL validation for all URL fields within a form
+function setupURLValidationForForm(formSelector) {
+  const form = document.querySelector(formSelector);
+  if (!form) return;
+
+  // Find all input fields with type="url" within the form
+  const urlFields = form.querySelectorAll('input[type="url"]');
+
+  urlFields.forEach((field) => {
+    // Validate on input (real-time)
+    field.addEventListener("input", function () {
+      const validation = validateSingleURL(this.value);
+      this.setCustomValidity(validation.message);
+    });
+
+    // Also validate on blur for better UX
+    field.addEventListener("blur", function () {
+      const validation = validateSingleURL(this.value);
+      this.setCustomValidity(validation.message);
+
+      // Trigger validation display if invalid
+      if (!validation.isValid) {
+        this.reportValidity();
+      }
+    });
+  });
+
+  return urlFields;
+}
+
+// Function to check all URL fields validity before form submission
+function checkAllURLFieldsValidity(formSelector) {
+  const form = document.querySelector(formSelector);
+  if (!form) return true;
+
+  const urlFields = form.querySelectorAll('input[type="url"]');
+
+  for (const field of urlFields) {
+    if (!field.checkValidity()) {
+      field.reportValidity();
+      return false;
+    }
+  }
+
+  return true;
+}
+
 // Send error details to webhook with origin and full response
 const sendErrorDetails = (origin, errorResponse) => {
   console.log("Sending error details to webhook");
@@ -65,6 +142,9 @@ const sendErrorDetails = (origin, errorResponse) => {
 
 // Script to show/hide sign up type field based on sign up type
 document.addEventListener("DOMContentLoaded", function () {
+  // Initialize URL validation for all URL fields in the form
+  setupURLValidationForForm("#submit-event");
+
   // Elements
   const signUpType = document.querySelector("#signUpType"); // Adjust this selector to match your dropdown or radio button
   const emailField = document.querySelector("#emailField");
@@ -148,6 +228,11 @@ const form = document.querySelector("#submit-event");
 form.addEventListener("submit", async function (event) {
   // Prevent the default form submission
   event.preventDefault();
+
+  // Check all URL fields validity before proceeding
+  if (!checkAllURLFieldsValidity("#submit-event")) {
+    return; // Stop submission if any URL field is invalid
+  }
 
   // two lines added for processing rich text input
   const detailsField = document.querySelector("#Further-details");
