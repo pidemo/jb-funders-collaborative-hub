@@ -181,7 +181,7 @@ document.addEventListener("DOMContentLoaded", async function () {
 
   /* part added by Lizzie for Character count */
   // Write the max number of characters to the element with an id of #charcount
-  let textMax = 100;
+  let textMax = 120;
   const charCountElement = document.getElementById("charcount");
   if (charCountElement) {
     charCountElement.textContent = textMax;
